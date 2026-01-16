@@ -98,3 +98,7 @@ def create_app(config_name='default'):
         init_default_data()
 
     return app
+
+
+# Create app instance for gunicorn (Zeabur default: gunicorn app:app)
+app = create_app()
