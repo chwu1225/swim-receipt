@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}月報表{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="d-flex justify-between align-center">
+        <h2 class="card-title" style="margin-bottom: 0;">📈 月報表</h2>
+        <form method="GET" class="d-flex gap-1">
+            <select name="year" class="form-control" style="width: 100px;">
+                {% for y in range(2024, 2030) %}
+                <option value="{{ y }}" {% if y == report.year %}selected{% endif %}>{{ y }}年</option>
+                {% endfor %}
+            </select>
+            <select name="month" class="form-control" style="width: 80px;">
+                {% for m in range(1, 13) %}
+                <option value="{{ m }}" {% if m == report.month %}selected{% endif %}>{{ m }}月</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">查詢</button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="d-flex justify-between align-center mb-2">
+        <h3>{{ report.year }}年{{ report.month }}月 收費彙整</h3>
+        <div class="d-flex gap-1">
+            <a href="{{ url_for('report.monthly_print', year=report.year, month=report.month) }}" class="btn btn-secondary" target="_blank">列印報表</a>
+            {% if current_user.can_export_reports() %}
+            <a href="{{ url_for('report.export_excel', year=report.year, month=report.month) }}" class="btn btn-success">匯出Excel</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if report.item_breakdown %}
+    <h4 style="margin: 1rem 0 0.5rem;">收費項目統計</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>項目名稱</th>
+                <th class="text-right">筆數</th>
+                <th class="text-right">金額</th>
+                <th class="text-right">佔比</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item_name, data in report.item_breakdown.items() %}
+            <tr>
+                <td>{{ item_name }}</td>
+                <td class="text-right">{{ data.count }}</td>
+                <td class="text-right">${{ data.total|int }}</td>
+                <td class="text-right">{{ '%.1f'|format(data.percentage) }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr style="font-weight: bold; background-color: #f8f9fa;">
+                <td>小計 (正常)</td>
+                <td class="text-right">{{ report.summary.active_count }}</td>
+                <td class="text-right">${{ report.summary.active_total|int }}</td>
+                <td class="text-right">100%</td>
+            </tr>
+            <tr style="color: #e74c3c;">
+                <td>作廢</td>
+                <td class="text-right">{{ report.summary.voided_count }}</td>
+                <td class="text-right">${{ report.summary.voided_total|int }}</td>
+                <td class="text-right">-</td>
+            </tr>
+        </tfoot>
+    </table>
+    {% else %}
+    <p class="text-center" style="padding: 2rem; color: #666;">當月無收據記錄</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 1rem;">💰 月結摘要</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 1rem; color: #2e7d32;">應繳總額</div>
+            <div style="font-size: 2rem; font-weight: bold; color: #1b5e20;">
+                ${{ report.summary.net_total|int }}
+            </div>
+            <div style="font-size: 0.9rem; color: #388e3c;">
+                {{ report.summary.net_total_chinese }}
+            </div>
+        </div>
+        <div style="background: #e3f2fd; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 1rem; color: #1565c0;">期間</div>
+            <div style="font-size: 1.2rem; color: #0d47a1;">
+                {{ report.period_start.strftime('%Y/%m/%d') }} ~ {{ report.period_end.strftime('%Y/%m/%d') }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if report.receipts %}
+<div class="card">
+    <h3 style="margin-bottom: 1rem;">📋 收據明細</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>收據編號</th>
+                <th>日期</th>
+                <th>收費項目</th>
+                <th class="text-right">金額</th>
+                <th>狀態</th>
+                <th>驗證</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for receipt in report.receipts[:50] %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('receipt.view', receipt_id=receipt.id) }}">{{ receipt.receipt_no }}</a>
+                </td>
+                <td>{{ receipt.created_at.strftime('%m/%d %H:%M') if receipt.created_at else '' }}</td>
+                <td>{{ receipt.item_name }}</td>
+                <td class="text-right">${{ receipt.amount|int }}</td>
+                <td>
+                    {% if receipt.status == 'active' %}
+                    <span class="badge badge-success">正常</span>
+                    {% elif receipt.status == 'void_pending' %}
+                    <span class="badge badge-warning">待作廢</span>
+                    {% else %}
+                    <span class="badge badge-danger">已作廢</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if receipt.is_verified %}
+                    <span class="badge badge-success">已驗證</span>
+                    {% else %}
+                    <span class="badge badge-secondary">未驗證</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if report.receipts|length > 50 %}
+    <p class="text-center" style="color: #666;">僅顯示前50筆，完整資料請匯出Excel</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

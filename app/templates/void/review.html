@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}審核作廢申請{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 0 auto;">
+    <div class="card">
+        <h2 class="card-title">🔍 審核作廢申請</h2>
+
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <h4 style="margin-bottom: 0.5rem;">收據資訊</h4>
+            <p><strong>收據編號：</strong>
+                <a href="{{ url_for('receipt.view', receipt_id=void_request.receipt.id) }}">
+                    {{ void_request.receipt.receipt_no }}
+                </a>
+            </p>
+            <p><strong>收費項目：</strong>{{ void_request.receipt.item_name }}</p>
+            <p><strong>金額：</strong><span style="font-size: 1.2rem; font-weight: bold; color: #e74c3c;">${{ void_request.receipt.amount|int }}</span></p>
+            <p><strong>開立時間：</strong>{{ void_request.receipt.created_at.strftime('%Y/%m/%d %H:%M') if void_request.receipt.created_at else '' }}</p>
+            <p><strong>經辦員：</strong>{{ void_request.receipt.operator_name }}</p>
+        </div>
+
+        <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <h4 style="margin-bottom: 0.5rem;">申請資訊</h4>
+            <p><strong>申請人：</strong>{{ void_request.requester.full_name }}</p>
+            <p><strong>申請時間：</strong>{{ void_request.requested_at.strftime('%Y/%m/%d %H:%M') if void_request.requested_at else '' }}</p>
+            <p><strong>作廢原因：</strong></p>
+            <div style="background: white; padding: 0.75rem; border-radius: 4px; margin-top: 0.5rem;">
+                {{ void_request.reason }}
+            </div>
+        </div>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="note">審核備註 (選填)</label>
+                <textarea id="note" name="note" class="form-control" rows="2"
+                          placeholder="如有需要可填寫審核備註"></textarea>
+            </div>
+
+            <div class="d-flex gap-1">
+                <button type="submit" name="action" value="approve" class="btn btn-success"
+                        onclick="return confirm('確定要核准此作廢申請嗎？收據將被標記為已作廢。')">
+                    ✓ 核准作廢
+                </button>
+                <button type="submit" name="action" value="reject" class="btn btn-danger"
+                        onclick="return confirm('確定要駁回此作廢申請嗎？')">
+                    ✕ 駁回申請
+                </button>
+                <a href="{{ url_for('void.index') }}" class="btn btn-secondary">返回</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

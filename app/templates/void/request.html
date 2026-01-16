@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}申請作廢{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 class="card-title">❌ 申請作廢收據</h2>
+
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <p><strong>收據編號：</strong>{{ receipt.receipt_no }}</p>
+            <p><strong>收費項目：</strong>{{ receipt.item_name }}</p>
+            <p><strong>金額：</strong><span style="font-size: 1.2rem; font-weight: bold; color: #e74c3c;">${{ receipt.amount|int }}</span></p>
+            <p><strong>開立時間：</strong>{{ receipt.created_at.strftime('%Y/%m/%d %H:%M') if receipt.created_at else '' }}</p>
+            <p><strong>經辦員：</strong>{{ receipt.operator_name }}</p>
+        </div>
+
+        <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #ffc107;">
+            <p style="color: #856404;">
+                ⚠️ 作廢申請送出後需經主管或出納審核通過才會生效。<br>
+                一旦作廢，該收據將無法恢復。
+            </p>
+        </div>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="reason">作廢原因 *</label>
+                <textarea id="reason" name="reason" class="form-control" rows="4"
+                          required placeholder="請詳細說明需要作廢此收據的原因"></textarea>
+            </div>
+
+            <div class="d-flex gap-1">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('確定要申請作廢此收據嗎？')">
+                    送出作廢申請
+                </button>
+                <a href="{{ url_for('receipt.view', receipt_id=receipt.id) }}" class="btn btn-secondary">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

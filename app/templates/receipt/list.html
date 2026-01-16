@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}收據查詢{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="d-flex justify-between align-center">
+        <h2 class="card-title" style="margin-bottom: 0;">🔍 收據查詢</h2>
+        <form action="{{ url_for('receipt.search') }}" method="GET" class="d-flex gap-1">
+            <input type="text" name="receipt_no" class="form-control" placeholder="輸入收據編號" style="width: 200px;">
+            <button type="submit" class="btn btn-primary">搜尋</button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    {% if receipts.items %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>收據編號</th>
+                <th>日期時間</th>
+                <th>收費項目</th>
+                <th class="text-right">金額</th>
+                <th>狀態</th>
+                <th>驗證</th>
+                <th>經辦員</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for receipt in receipts.items %}
+            <tr>
+                <td>{{ receipt.receipt_no }}</td>
+                <td>{{ receipt.created_at.strftime('%Y/%m/%d %H:%M') if receipt.created_at else '' }}</td>
+                <td>{{ receipt.item_name }}</td>
+                <td class="text-right">${{ receipt.amount|int }}</td>
+                <td>
+                    {% if receipt.status == 'active' %}
+                    <span class="badge badge-success">正常</span>
+                    {% elif receipt.status == 'void_pending' %}
+                    <span class="badge badge-warning">待作廢</span>
+                    {% else %}
+                    <span class="badge badge-danger">已作廢</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if receipt.is_verified %}
+                    <span class="badge badge-success">已驗證</span>
+                    {% else %}
+                    <span class="badge badge-secondary">未驗證</span>
+                    {% endif %}
+                </td>
+                <td>{{ receipt.operator_name }}</td>
+                <td>
+                    <a href="{{ url_for('receipt.view', receipt_id=receipt.id) }}" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">查看</a>
+                    <a href="{{ url_for('receipt.print_receipt', receipt_id=receipt.id) }}" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">列印</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if receipts.pages > 1 %}
+    <div class="pagination">
+        {% if receipts.has_prev %}
+        <a href="{{ url_for('receipt.index', page=receipts.prev_num) }}">上一頁</a>
+        {% endif %}
+
+        {% for page in receipts.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page %}
+                {% if page == receipts.page %}
+                <span class="active">{{ page }}</span>
+                {% else %}
+                <a href="{{ url_for('receipt.index', page=page) }}">{{ page }}</a>
+                {% endif %}
+            {% else %}
+            <span>...</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if receipts.has_next %}
+        <a href="{{ url_for('receipt.index', page=receipts.next_num) }}">下一頁</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <p class="text-center" style="padding: 2rem; color: #666;">目前沒有收據記錄</p>
+    {% endif %}
+</div>
+{% endblock %}

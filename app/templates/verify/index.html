@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}出納驗證{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title">✅ 出納驗證</h2>
+    <p>驗證各操作員的收據並確認繳款</p>
+</div>
+
+<div class="card">
+    <div class="d-flex justify-between align-center mb-2">
+        <h3>本月各操作員驗證狀態</h3>
+        <a href="{{ url_for('verify.payment_list') }}" class="btn btn-secondary">查看繳款紀錄</a>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>操作員</th>
+                <th class="text-right">總筆數</th>
+                <th class="text-right">總金額</th>
+                <th class="text-right">已驗證</th>
+                <th class="text-right">未驗證</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for summary in summaries %}
+            <tr>
+                <td>{{ summary.operator.full_name }}</td>
+                <td class="text-right">{{ summary.total_count }}</td>
+                <td class="text-right">${{ summary.total_amount|int }}</td>
+                <td class="text-right">
+                    <span class="badge badge-success">{{ summary.verified_count }}</span>
+                    ${{ summary.verified_amount|int }}
+                </td>
+                <td class="text-right">
+                    {% if summary.unverified_count > 0 %}
+                    <span class="badge badge-warning">{{ summary.unverified_count }}</span>
+                    ${{ summary.unverified_amount|int }}
+                    {% else %}
+                    <span class="badge badge-secondary">0</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if summary.unverified_count > 0 %}
+                    <a href="{{ url_for('verify.operator_detail', operator_id=summary.operator.id) }}" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">驗證</a>
+                    {% endif %}
+                    {% if summary.total_count > 0 %}
+                    <a href="{{ url_for('verify.create_payment', operator_id=summary.operator.id) }}" class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">繳款</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}使用者管理{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="d-flex justify-between align-center">
+        <h2 class="card-title" style="margin-bottom: 0;">👥 使用者管理</h2>
+        <a href="{{ url_for('admin.create_user') }}" class="btn btn-success">+ 新增使用者</a>
+    </div>
+</div>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>帳號</th>
+                <th>姓名</th>
+                <th>角色</th>
+                <th>狀態</th>
+                <th>建立時間</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.full_name }}</td>
+                <td>
+                    {% if user.role == 'admin' %}
+                    <span class="badge badge-danger">管理員</span>
+                    {% elif user.role == 'cashier' %}
+                    <span class="badge badge-success">出納</span>
+                    {% elif user.role == 'supervisor' %}
+                    <span class="badge badge-warning">主管</span>
+                    {% else %}
+                    <span class="badge badge-secondary">操作員</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.is_active %}
+                    <span style="color: #27ae60;">啟用</span>
+                    {% else %}
+                    <span style="color: #e74c3c;">停用</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.created_at.strftime('%Y/%m/%d') if user.created_at else '' }}</td>
+                <td>
+                    <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">編輯</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="{{ url_for('admin.index') }}" class="btn btn-secondary">返回</a>
+{% endblock %}

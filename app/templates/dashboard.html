@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}首頁{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title">歡迎使用游泳池收費系統</h2>
+    <p>您好，{{ current_user.full_name }}！</p>
+    <p class="mt-1">您的角色：{{ current_user.role_display }}</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+    {% if current_user.can_create_receipt() %}
+    <div class="card">
+        <h3 class="card-title">📝 開立收據</h3>
+        <p>為游泳池使用者開立收費收據</p>
+        <a href="{{ url_for('receipt.create') }}" class="btn btn-primary mt-2">開立新收據</a>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <h3 class="card-title">🔍 收據查詢</h3>
+        <p>查詢已開立的收據記錄</p>
+        <a href="{{ url_for('receipt.index') }}" class="btn btn-primary mt-2">查詢收據</a>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title">📊 日報表</h3>
+        <p>查看每日收費明細與統計</p>
+        <a href="{{ url_for('report.daily') }}" class="btn btn-primary mt-2">查看日報表</a>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title">📈 月報表</h3>
+        <p>查看月份收費彙整報表</p>
+        <a href="{{ url_for('report.monthly') }}" class="btn btn-primary mt-2">查看月報表</a>
+    </div>
+
+    {% if current_user.can_verify_receipt() %}
+    <div class="card">
+        <h3 class="card-title">✅ 出納驗證</h3>
+        <p>驗證收據並確認繳款</p>
+        <a href="{{ url_for('verify.index') }}" class="btn btn-success mt-2">進入驗證</a>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <h3 class="card-title">❌ 作廢管理</h3>
+        <p>申請或審核收據作廢</p>
+        <a href="{{ url_for('void.index') }}" class="btn btn-danger mt-2">作廢管理</a>
+    </div>
+
+    {% if current_user.can_manage_users() %}
+    <div class="card">
+        <h3 class="card-title">⚙️ 系統管理</h3>
+        <p>管理使用者與收費項目</p>
+        <a href="{{ url_for('admin.index') }}" class="btn btn-secondary mt-2">系統管理</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

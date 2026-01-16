@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}驗證收據 - {{ operator.full_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title">✅ 驗證收據 - {{ operator.full_name }}</h2>
+    <p>期間: {{ summary.period_start.strftime('%Y/%m/%d') }} ~ {{ summary.period_end.strftime('%Y/%m/%d') }}</p>
+</div>
+
+<div class="card">
+    <div class="d-flex justify-between align-center mb-2">
+        <h3>待驗證收據 ({{ summary.unverified_count }} 筆，共 ${{ summary.unverified_amount|int }})</h3>
+        {% if summary.unverified_receipts %}
+        <form method="POST" action="{{ url_for('verify.verify_batch') }}" id="batchForm">
+            <input type="hidden" name="next" value="{{ url_for('verify.operator_detail', operator_id=operator.id) }}">
+            <button type="submit" class="btn btn-success" onclick="return selectAllAndSubmit()">全部驗證</button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if summary.unverified_receipts %}
+    <form method="POST" action="{{ url_for('verify.verify_batch') }}" id="verifyForm">
+        <input type="hidden" name="next" value="{{ url_for('verify.operator_detail', operator_id=operator.id) }}">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">
+                        <input type="checkbox" id="selectAll" onclick="toggleAll()">
+                    </th>
+                    <th>收據編號</th>
+                    <th>日期</th>
+                    <th>收費項目</th>
+                    <th class="text-right">金額</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for receipt in summary.unverified_receipts %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="receipt_ids" value="{{ receipt.id }}" class="receipt-checkbox">
+                    </td>
+                    <td>
+                        <a href="{{ url_for('receipt.view', receipt_id=receipt.id) }}">{{ receipt.receipt_no }}</a>
+                    </td>
+                    <td>{{ receipt.created_at.strftime('%m/%d %H:%M') if receipt.created_at else '' }}</td>
+                    <td>{{ receipt.item_name }}</td>
+                    <td class="text-right">${{ receipt.amount|int }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('verify.verify_single', receipt_id=receipt.id) }}" style="display: inline;">
+                            <input type="hidden" name="next" value="{{ url_for('verify.operator_detail', operator_id=operator.id) }}">
+                            <button type="submit" class="btn btn-success" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">驗證</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="mt-2">
+            <button type="submit" class="btn btn-primary">驗證勾選項目</button>
+        </div>
+    </form>
+    {% else %}
+    <p class="text-center" style="padding: 2rem; color: #27ae60;">
+        ✅ 此操作員的所有收據都已驗證完成
+    </p>
+    {% endif %}
+</div>
+
+<div class="d-flex gap-1 mt-2">
+    <a href="{{ url_for('verify.create_payment', operator_id=operator.id) }}" class="btn btn-success">建立繳款紀錄</a>
+    <a href="{{ url_for('verify.index') }}" class="btn btn-secondary">返回</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.receipt-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+}
+
+function selectAllAndSubmit() {
+    const checkboxes = document.querySelectorAll('.receipt-checkbox');
+    const form = document.getElementById('batchForm');
+
+    checkboxes.forEach(cb => {
+        cb.checked = true;
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'receipt_ids';
+        input.value = cb.value;
+        form.appendChild(input);
+    });
+
+    if (checkboxes.length === 0) {
+        alert('沒有待驗證的收據');
+        return false;
+    }
+
+    return confirm('確定要驗證所有 ' + checkboxes.length + ' 筆收據嗎？');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}開立收據{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 class="card-title">📝 開立收據</h2>
+
+        <form method="POST" id="receiptForm">
+            <div class="form-group">
+                <label for="item_id">收費項目 *</label>
+                <select id="item_id" name="item_id" class="form-control" required>
+                    <option value="">-- 請選擇收費項目 --</option>
+                    {% set current_category = namespace(value='') %}
+                    {% for item in fee_items %}
+                        {% if item.category != current_category.value %}
+                            {% if current_category.value %}
+                            </optgroup>
+                            {% endif %}
+                            <optgroup label="{{ item.category or '其他' }}">
+                            {% set current_category.value = item.category %}
+                        {% endif %}
+                        <option value="{{ item.id }}" data-price="{{ item.default_price }}">
+                            {{ item.item_name }} - ${{ item.default_price|int }}
+                        </option>
+                    {% endfor %}
+                    {% if current_category.value %}
+                    </optgroup>
+                    {% endif %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="amount">金額 *</label>
+                <input type="number" id="amount" name="amount" class="form-control"
+                       required min="1" step="1" placeholder="請輸入金額">
+            </div>
+
+            <div class="form-group">
+                <label for="remark">備註</label>
+                <input type="text" id="remark" name="remark" class="form-control"
+                       placeholder="選填，如有需要可填寫備註">
+            </div>
+
+            <div id="preview" class="card" style="background-color: #f8f9fa; display: none;">
+                <h4 style="margin-bottom: 0.5rem;">📋 收據預覽</h4>
+                <p><strong>收費項目：</strong><span id="preview-item"></span></p>
+                <p><strong>金額：</strong>$<span id="preview-amount"></span> 元</p>
+                <p><strong>經辦員：</strong>{{ current_user.full_name }}</p>
+            </div>
+
+            <div class="d-flex gap-1 mt-2">
+                <button type="submit" class="btn btn-success">確認開立</button>
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const itemSelect = document.getElementById('item_id');
+    const amountInput = document.getElementById('amount');
+    const preview = document.getElementById('preview');
+    const previewItem = document.getElementById('preview-item');
+    const previewAmount = document.getElementById('preview-amount');
+
+    itemSelect.addEventListener('change', function() {
+        const selected = this.options[this.selectedIndex];
+        if (selected.value) {
+            const price = selected.dataset.price;
+            amountInput.value = price;
+            updatePreview();
+        }
+    });
+
+    amountInput.addEventListener('input', updatePreview);
+
+    function updatePreview() {
+        const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+        if (selectedOption.value && amountInput.value) {
+            previewItem.textContent = selectedOption.text.split(' - ')[0];
+            previewAmount.textContent = parseInt(amountInput.value).toLocaleString();
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+
+    document.getElementById('receiptForm').addEventListener('submit', function(e) {
+        if (!itemSelect.value) {
+            e.preventDefault();
+            alert('請選擇收費項目');
+            return;
+        }
+        if (!amountInput.value || amountInput.value <= 0) {
+            e.preventDefault();
+            alert('請輸入有效金額');
+            return;
+        }
+        if (!confirm('確定要開立此收據嗎？')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

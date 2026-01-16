@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}作廢申請歷史{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title">📋 作廢申請歷史</h2>
+</div>
+
+<div class="card">
+    {% if requests.items %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>收據編號</th>
+                <th>金額</th>
+                <th>申請人</th>
+                <th>申請時間</th>
+                <th>狀態</th>
+                <th>審核人</th>
+                <th>審核時間</th>
+                <th>審核備註</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requests.items %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('receipt.view', receipt_id=req.receipt_id) }}">
+                        {{ req.receipt.receipt_no }}
+                    </a>
+                </td>
+                <td>${{ req.receipt.amount|int }}</td>
+                <td>{{ req.requester.full_name }}</td>
+                <td>{{ req.requested_at.strftime('%m/%d %H:%M') if req.requested_at else '' }}</td>
+                <td>
+                    {% if req.status == 'pending' %}
+                    <span class="badge badge-warning">待審核</span>
+                    {% elif req.status == 'approved' %}
+                    <span class="badge badge-success">已核准</span>
+                    {% else %}
+                    <span class="badge badge-danger">已駁回</span>
+                    {% endif %}
+                </td>
+                <td>{{ req.reviewer.full_name if req.reviewer else '-' }}</td>
+                <td>{{ req.reviewed_at.strftime('%m/%d %H:%M') if req.reviewed_at else '-' }}</td>
+                <td>{{ req.review_note or '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if requests.pages > 1 %}
+    <div class="pagination">
+        {% if requests.has_prev %}
+        <a href="{{ url_for('void.history', page=requests.prev_num) }}">上一頁</a>
+        {% endif %}
+
+        {% for page in requests.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page %}
+                {% if page == requests.page %}
+                <span class="active">{{ page }}</span>
+                {% else %}
+                <a href="{{ url_for('void.history', page=page) }}">{{ page }}</a>
+                {% endif %}
+            {% else %}
+            <span>...</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if requests.has_next %}
+        <a href="{{ url_for('void.history', page=requests.next_num) }}">下一頁</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <p class="text-center" style="padding: 2rem; color: #666;">目前沒有作廢申請紀錄</p>
+    {% endif %}
+</div>
+
+<a href="{{ url_for('void.index') }}" class="btn btn-secondary">返回</a>
+{% endblock %}

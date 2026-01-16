@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}登入{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 3rem auto;">
+    <div class="card">
+        <h2 class="card-title text-center">🏊 游泳池收費系統</h2>
+        <p class="text-center mb-2">臺北市立大學</p>
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <div class="form-group">
+                <label for="username">帳號</label>
+                <input type="text" id="username" name="username" class="form-control" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="password">密碼</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">
+                登入
+            </button>
+        </form>
+    </div>
+
+    <div class="card" style="background-color: #fff3cd; border: 1px solid #ffc107;">
+        <p style="font-size: 0.85rem; color: #856404;">
+            <strong>預設帳號：</strong><br>
+            管理員: admin / admin123<br>
+            操作員: operator / operator123<br>
+            出納: cashier / cashier123<br>
+            主管: supervisor / supervisor123
+        </p>
+    </div>
+</div>
+{% endblock %}

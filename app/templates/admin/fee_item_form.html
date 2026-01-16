@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}{{ '編輯收費項目' if item else '新增收費項目' }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 class="card-title">{{ '編輯收費項目' if item else '新增收費項目' }}</h2>
+
+        <form method="POST">
+            {% if not item %}
+            <div class="form-group">
+                <label for="item_code">項目代碼 *</label>
+                <input type="text" id="item_code" name="item_code" class="form-control"
+                       required placeholder="例如: ADM-STU">
+                <small style="color: #666;">建立後無法修改</small>
+            </div>
+            {% else %}
+            <div class="form-group">
+                <label>項目代碼</label>
+                <input type="text" class="form-control" value="{{ item.item_code }}" disabled>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="item_name">項目名稱 *</label>
+                <input type="text" id="item_name" name="item_name" class="form-control"
+                       required placeholder="例如: 游泳池入場券-學生"
+                       value="{{ item.item_name if item else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="category">類別</label>
+                <select id="category" name="category" class="form-control">
+                    <option value="">-- 請選擇 --</option>
+                    <option value="入場券" {% if item and item.category == '入場券' %}selected{% endif %}>入場券</option>
+                    <option value="票券" {% if item and item.category == '票券' %}selected{% endif %}>票券</option>
+                    <option value="課程" {% if item and item.category == '課程' %}selected{% endif %}>課程</option>
+                    <option value="租借" {% if item and item.category == '租借' %}selected{% endif %}>租借</option>
+                    <option value="其他" {% if item and item.category == '其他' %}selected{% endif %}>其他</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="identity_type">身份類型</label>
+                <select id="identity_type" name="identity_type" class="form-control">
+                    <option value="">-- 不限身份 --</option>
+                    <option value="學生" {% if item and item.identity_type == '學生' %}selected{% endif %}>學生</option>
+                    <option value="教職員" {% if item and item.identity_type == '教職員' %}selected{% endif %}>教職員</option>
+                    <option value="校外人士" {% if item and item.identity_type == '校外人士' %}selected{% endif %}>校外人士</option>
+                    <option value="優惠票" {% if item and item.identity_type == '優惠票' %}selected{% endif %}>優惠票</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="default_price">預設金額 *</label>
+                <input type="number" id="default_price" name="default_price" class="form-control"
+                       required min="0" step="1"
+                       value="{{ item.default_price|int if item else '' }}"
+                       placeholder="請輸入預設金額">
+            </div>
+
+            <div class="form-group">
+                <label for="description">說明</label>
+                <input type="text" id="description" name="description" class="form-control"
+                       placeholder="選填，項目說明"
+                       value="{{ item.description if item else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="sort_order">排序</label>
+                <input type="number" id="sort_order" name="sort_order" class="form-control"
+                       min="0" value="{{ item.sort_order if item else 0 }}">
+                <small style="color: #666;">數字越小越前面</small>
+            </div>
+
+            {% if item %}
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="is_active" {% if item.is_active %}checked{% endif %}>
+                    啟用此項目
+                </label>
+            </div>
+            {% endif %}
+
+            <div class="d-flex gap-1">
+                <button type="submit" class="btn btn-success">{{ '儲存變更' if item else '建立項目' }}</button>
+                <a href="{{ url_for('admin.fee_items') }}" class="btn btn-secondary">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

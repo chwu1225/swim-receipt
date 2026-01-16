@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}收費項目管理{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="d-flex justify-between align-center">
+        <h2 class="card-title" style="margin-bottom: 0;">💲 收費項目管理</h2>
+        <a href="{{ url_for('admin.create_fee_item') }}" class="btn btn-success">+ 新增項目</a>
+    </div>
+</div>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>代碼</th>
+                <th>項目名稱</th>
+                <th>類別</th>
+                <th>身份</th>
+                <th class="text-right">預設金額</th>
+                <th>狀態</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr {% if not item.is_active %}style="opacity: 0.5;"{% endif %}>
+                <td>{{ item.item_code }}</td>
+                <td>{{ item.item_name }}</td>
+                <td>{{ item.category or '-' }}</td>
+                <td>{{ item.identity_type or '-' }}</td>
+                <td class="text-right">${{ item.default_price|int }}</td>
+                <td>
+                    {% if item.is_active %}
+                    <span style="color: #27ae60;">啟用</span>
+                    {% else %}
+                    <span style="color: #e74c3c;">停用</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('admin.edit_fee_item', item_id=item.id) }}" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">編輯</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="{{ url_for('admin.index') }}" class="btn btn-secondary">返回</a>
+{% endblock %}

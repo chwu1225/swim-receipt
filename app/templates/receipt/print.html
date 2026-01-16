@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>收據列印 - {{ receipt.receipt_no }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft JhengHei', 'Noto Sans TC', 'SimSun', sans-serif;
+            font-size: 12pt;
+            line-height: 1.6;
+        }
+        .receipt-container {
+            max-width: 18cm;
+            margin: 0 auto;
+            padding: 1cm;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 1cm;
+        }
+        .header h1 {
+            font-size: 18pt;
+            margin-bottom: 0.3cm;
+        }
+        .header h2 {
+            font-size: 14pt;
+            font-weight: normal;
+        }
+        .meta {
+            text-align: right;
+            margin-bottom: 0.5cm;
+            font-size: 10pt;
+        }
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1cm;
+        }
+        .receipt-table th,
+        .receipt-table td {
+            border: 1px solid #000;
+            padding: 0.4cm;
+            text-align: center;
+        }
+        .receipt-table th {
+            background-color: #f0f0f0;
+        }
+        .receipt-table .item-col {
+            width: 60%;
+            text-align: left;
+        }
+        .receipt-table .amount-col {
+            width: 20%;
+            text-align: right;
+        }
+        .receipt-table .remark-col {
+            width: 20%;
+        }
+        .total-section {
+            margin-bottom: 1cm;
+            font-size: 12pt;
+        }
+        .total-section p {
+            margin: 0.2cm 0;
+        }
+        .total-amount {
+            font-size: 14pt;
+            font-weight: bold;
+        }
+        .chinese-amount {
+            font-size: 12pt;
+        }
+        .signature-section {
+            margin-top: 1.5cm;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .operator {
+            font-size: 11pt;
+        }
+        .stamp {
+            width: 3cm;
+            height: 3cm;
+            border: 2px dashed #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10pt;
+            color: #666;
+        }
+        .footer {
+            margin-top: 1cm;
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 0.5cm;
+        }
+        .no-print {
+            margin-bottom: 1cm;
+            text-align: center;
+        }
+        .no-print button {
+            padding: 0.5rem 1.5rem;
+            font-size: 1rem;
+            margin: 0 0.5rem;
+            cursor: pointer;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+        @media screen {
+            body {
+                background: #f0f0f0;
+                padding: 2rem;
+            }
+            .receipt-container {
+                background: white;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                padding: 2cm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button onclick="window.print()">🖨️ 列印收據</button>
+        <button onclick="window.close()">關閉</button>
+        <button onclick="location.href='{{ url_for('receipt.index') }}'">返回列表</button>
+    </div>
+
+    <div class="receipt-container">
+        <div class="header">
+            <h1>臺北市立大學</h1>
+            <h2>游泳池收費收據</h2>
+        </div>
+
+        <div class="meta">
+            <p>{{ receipt.created_at.strftime('%Y/%m/%d %H:%M:%S') if receipt.created_at else '' }}</p>
+            <p>收據編號: {{ receipt.receipt_no }}</p>
+        </div>
+
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th class="item-col">收 費 項 目</th>
+                    <th class="amount-col">金 額</th>
+                    <th class="remark-col">備 註</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="item-col">{{ receipt.item_name }}</td>
+                    <td class="amount-col">{{ receipt.amount|int }}</td>
+                    <td class="remark-col">{{ receipt.remark or '' }}</td>
+                </tr>
+                <tr>
+                    <td class="item-col">&nbsp;</td>
+                    <td class="amount-col">&nbsp;</td>
+                    <td class="remark-col">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="item-col">&nbsp;</td>
+                    <td class="amount-col">&nbsp;</td>
+                    <td class="remark-col">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="item-col">&nbsp;</td>
+                    <td class="amount-col">&nbsp;</td>
+                    <td class="remark-col">&nbsp;</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="total-section">
+            <p class="total-amount">合 計： {{ receipt.amount|int }} 元</p>
+            <p class="chinese-amount">新台幣： {{ receipt.amount_chinese }}</p>
+        </div>
+
+        <div class="signature-section">
+            <div class="operator">
+                經辦員：{{ receipt.operator_name }}
+            </div>
+            <div class="stamp">
+                [游泳池收費專用章]
+            </div>
+        </div>
+
+        <div class="footer">
+            本收據為游泳池現金收費證明，請妥善保管
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ '編輯使用者' if user else '新增使用者' }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto;">
+    <div class="card">
+        <h2 class="card-title">{{ '編輯使用者' if user else '新增使用者' }}</h2>
+
+        <form method="POST">
+            {% if not user %}
+            <div class="form-group">
+                <label for="username">帳號 *</label>
+                <input type="text" id="username" name="username" class="form-control"
+                       required placeholder="請輸入登入帳號">
+            </div>
+            {% else %}
+            <div class="form-group">
+                <label>帳號</label>
+                <input type="text" class="form-control" value="{{ user.username }}" disabled>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="full_name">姓名 *</label>
+                <input type="text" id="full_name" name="full_name" class="form-control"
+                       required placeholder="請輸入真實姓名"
+                       value="{{ user.full_name if user else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="role">角色 *</label>
+                <select id="role" name="role" class="form-control" required>
+                    <option value="operator" {% if user and user.role == 'operator' %}selected{% endif %}>操作員</option>
+                    <option value="supervisor" {% if user and user.role == 'supervisor' %}selected{% endif %}>主管</option>
+                    <option value="cashier" {% if user and user.role == 'cashier' %}selected{% endif %}>出納</option>
+                    <option value="admin" {% if user and user.role == 'admin' %}selected{% endif %}>管理員</option>
+                </select>
+            </div>
+
+            {% if user %}
+            <div class="form-group">
+                <label for="new_password">新密碼 (不修改請留空)</label>
+                <input type="password" id="new_password" name="new_password" class="form-control"
+                       placeholder="如需變更密碼請輸入" minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %}>
+                    啟用此帳號
+                </label>
+            </div>
+            {% else %}
+            <div class="form-group">
+                <label for="password">密碼 *</label>
+                <input type="password" id="password" name="password" class="form-control"
+                       required placeholder="請輸入密碼" minlength="6">
+                <small style="color: #666;">至少6個字元</small>
+            </div>
+            {% endif %}
+
+            <div class="d-flex gap-1">
+                <button type="submit" class="btn btn-success">{{ '儲存變更' if user else '建立使用者' }}</button>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}系統管理{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title">⚙️ 系統管理</h2>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+    <div class="card">
+        <h3 class="card-title">👥 使用者管理</h3>
+        <p>目前共 {{ user_count }} 位使用者</p>
+        <p>管理操作員、主管、出納等帳號</p>
+        <a href="{{ url_for('admin.users') }}" class="btn btn-primary mt-2">管理使用者</a>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title">💲 收費項目管理</h3>
+        <p>目前共 {{ item_count }} 個啟用項目</p>
+        <p>管理游泳池各項收費設定</p>
+        <a href="{{ url_for('admin.fee_items') }}" class="btn btn-primary mt-2">管理收費項目</a>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title">🔑 變更密碼</h3>
+        <p>變更您的登入密碼</p>
+        <a href="{{ url_for('auth.change_password') }}" class="btn btn-secondary mt-2">變更密碼</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}收據詳情{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 0 auto;">
+    <div class="card">
+        <h2 class="card-title">📄 收據詳情</h2>
+
+        <table class="table">
+            <tr>
+                <th style="width: 150px;">收據編號</th>
+                <td>{{ receipt.receipt_no }}</td>
+            </tr>
+            <tr>
+                <th>開立日期</th>
+                <td>{{ receipt.created_at.strftime('%Y/%m/%d %H:%M:%S') if receipt.created_at else '' }}</td>
+            </tr>
+            <tr>
+                <th>收費項目</th>
+                <td>{{ receipt.item_name }}</td>
+            </tr>
+            <tr>
+                <th>金額</th>
+                <td style="font-size: 1.2rem; font-weight: bold; color: #1a5276;">
+                    ${{ receipt.amount|int }} 元
+                </td>
+            </tr>
+            <tr>
+                <th>國字金額</th>
+                <td>{{ receipt.amount_chinese }}</td>
+            </tr>
+            <tr>
+                <th>備註</th>
+                <td>{{ receipt.remark or '-' }}</td>
+            </tr>
+            <tr>
+                <th>經辦員</th>
+                <td>{{ receipt.operator_name }}</td>
+            </tr>
+            <tr>
+                <th>狀態</th>
+                <td>
+                    {% if receipt.status == 'active' %}
+                    <span class="badge badge-success">正常</span>
+                    {% elif receipt.status == 'void_pending' %}
+                    <span class="badge badge-warning">待審核作廢</span>
+                    {% else %}
+                    <span class="badge badge-danger">已作廢</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>驗證狀態</th>
+                <td>
+                    {% if receipt.is_verified %}
+                    <span class="badge badge-success">已驗證</span>
+                    <br><small>驗證時間: {{ receipt.verified_at.strftime('%Y/%m/%d %H:%M') if receipt.verified_at else '' }}</small>
+                    {% else %}
+                    <span class="badge badge-secondary">未驗證</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% if receipt.status == 'voided' %}
+            <tr>
+                <th>作廢原因</th>
+                <td style="color: #e74c3c;">{{ receipt.void_reason }}</td>
+            </tr>
+            <tr>
+                <th>作廢時間</th>
+                <td>{{ receipt.voided_at.strftime('%Y/%m/%d %H:%M') if receipt.voided_at else '' }}</td>
+            </tr>
+            {% endif %}
+        </table>
+
+        <div class="d-flex gap-1 mt-2">
+            <a href="{{ url_for('receipt.print_receipt', receipt_id=receipt.id) }}" class="btn btn-primary">列印收據</a>
+            <a href="{{ url_for('receipt.download_pdf', receipt_id=receipt.id) }}" class="btn btn-secondary">下載PDF</a>
+            {% if receipt.can_void %}
+            <a href="{{ url_for('void.request_void', receipt_id=receipt.id) }}" class="btn btn-danger">申請作廢</a>
+            {% endif %}
+            <a href="{{ url_for('receipt.index') }}" class="btn btn-secondary">返回列表</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
