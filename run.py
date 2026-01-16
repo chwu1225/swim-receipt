@@ -4,13 +4,16 @@ Swimming Pool Receipt System - Application Entry Point
 import os
 from app import create_app
 
-# Create data directory if not exists
-data_dir = os.path.join(os.path.dirname(__file__), 'data')
-if not os.path.exists(data_dir):
-    os.makedirs(data_dir)
-
-# Determine environment (default to production for Zeabur)
+# Create data directory only in development mode
+# Production (Zeabur) uses /tmp/swim.db which doesn't need this directory
 env = os.environ.get('FLASK_ENV', 'production')
+if env != 'production':
+    data_dir = os.path.join(os.path.dirname(__file__), 'data')
+    if not os.path.exists(data_dir):
+        try:
+            os.makedirs(data_dir)
+        except OSError:
+            pass  # Ignore if can't create directory
 
 # Create application
 app = create_app(env)
