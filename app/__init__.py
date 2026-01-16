@@ -101,4 +101,6 @@ def create_app(config_name='default'):
 
 
 # Create app instance for gunicorn (Zeabur default: gunicorn app:app)
-app = create_app()
+# Use FLASK_ENV environment variable, default to 'production' for cloud deployment
+env = os.environ.get('FLASK_ENV', 'production')
+app = create_app(env)
