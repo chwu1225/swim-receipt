@@ -3,6 +3,7 @@ Payment Record Model - Monthly payment records
 """
 from app import db
 from datetime import datetime
+from app.timezone import now_tw
 
 
 class PaymentRecord(db.Model):
@@ -19,7 +20,7 @@ class PaymentRecord(db.Model):
     difference = db.Column(db.Numeric(12, 2))  # Difference
 
     received_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    received_at = db.Column(db.DateTime, default=datetime.utcnow)
+    received_at = db.Column(db.DateTime, default=now_tw)
     notes = db.Column(db.String(500))
 
     # Relationships

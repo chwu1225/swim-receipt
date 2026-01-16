@@ -7,6 +7,7 @@ from sqlalchemy import func, and_
 from datetime import date, datetime
 from calendar import monthrange
 from decimal import Decimal
+from app.timezone import today_tw
 
 
 class ReportService:
@@ -25,7 +26,7 @@ class ReportService:
             dict with receipts and summary
         """
         if target_date is None:
-            target_date = date.today()
+            target_date = today_tw()
 
         query = Receipt.query.filter(
             func.date(Receipt.created_at) == target_date
@@ -161,9 +162,9 @@ class ReportService:
             dict with verification summary
         """
         if year is None:
-            year = date.today().year
+            year = today_tw().year
         if month is None:
-            month = date.today().month
+            month = today_tw().month
 
         start_date = date(year, month, 1)
         _, last_day = monthrange(year, month)

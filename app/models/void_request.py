@@ -3,6 +3,7 @@ Void Request Model - Receipt void requests
 """
 from app import db
 from datetime import datetime
+from app.timezone import now_tw
 
 
 class VoidRequest(db.Model):
@@ -13,7 +14,7 @@ class VoidRequest(db.Model):
     receipt_id = db.Column(db.Integer, db.ForeignKey('receipts.id'), nullable=False)
     reason = db.Column(db.String(500), nullable=False)
     requested_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    requested_at = db.Column(db.DateTime, default=datetime.utcnow)
+    requested_at = db.Column(db.DateTime, default=now_tw)
 
     status = db.Column(db.String(20), default='pending', index=True)
     reviewed_by = db.Column(db.Integer, db.ForeignKey('users.id'))

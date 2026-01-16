@@ -3,6 +3,7 @@ Receipt Model - Swimming pool receipts
 """
 from app import db
 from datetime import datetime, date
+from app.timezone import now_tw, today_tw
 
 
 class Receipt(db.Model):
@@ -20,7 +21,7 @@ class Receipt(db.Model):
     # Operator info
     operator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     operator_name = db.Column(db.String(50), nullable=False)  # Denormalized
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    created_at = db.Column(db.DateTime, default=now_tw, index=True)
 
     # Status
     status = db.Column(db.String(20), default='active', index=True)
@@ -46,7 +47,7 @@ class Receipt(db.Model):
     @classmethod
     def generate_receipt_no(cls, prefix='SWIM'):
         """Generate unique receipt number: SWIM-YYYYMMDD-XXXX"""
-        today = date.today()
+        today = today_tw()
         date_str = today.strftime('%Y%m%d')
         prefix_pattern = f'{prefix}-{date_str}-'
 
@@ -83,7 +84,7 @@ class Receipt(db.Model):
     def get_daily_receipts(cls, target_date=None, operator_id=None):
         """Get receipts for a specific date"""
         if target_date is None:
-            target_date = date.today()
+            target_date = today_tw()
 
         query = cls.query.filter(
             db.func.date(cls.created_at) == target_date
