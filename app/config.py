@@ -32,9 +32,15 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
-    # Use /tmp for container environments (Zeabur, etc.)
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:////tmp/swim.db'
+
+    # Get DATABASE_URL from environment (Zeabur PostgreSQL)
+    # Zeabur uses postgres:// but SQLAlchemy requires postgresql://
+    _database_url = os.environ.get('DATABASE_URL')
+    if _database_url and _database_url.startswith('postgres://'):
+        _database_url = _database_url.replace('postgres://', 'postgresql://', 1)
+
+    # Use PostgreSQL if DATABASE_URL is set, otherwise fallback to SQLite
+    SQLALCHEMY_DATABASE_URI = _database_url or 'sqlite:////tmp/swim.db'
 
 
 class TestingConfig(Config):
